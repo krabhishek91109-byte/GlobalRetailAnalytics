@@ -7,7 +7,7 @@ function RecentOrders({ search }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/sales")
+    fetch("https://globalretailanalytics.onrender.com/sales")
       .then((res) => res.json())
       .then((data) => {
         const latestOrders = [...data]
