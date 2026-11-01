@@ -2,10 +2,10 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "mysql+pymysql://root:password91109%40@localhost:3306/global_retail"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is not set")
 
 engine = create_engine(DATABASE_URL)
 
