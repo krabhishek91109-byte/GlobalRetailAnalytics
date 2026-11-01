@@ -7,7 +7,7 @@ function ExportReports() {
   const [sales, setSales] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/sales")
+    fetch(`${import.meta.env.VITE_API_URL}/sales`)
       .then((res) => res.json())
       .then((data) => setSales(data));
   }, []);
