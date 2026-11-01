@@ -1,27 +1,65 @@
-function GlobalKPICards() {
+function GlobalKPICards({ data = [] }) {
+  const totalRevenue = data.reduce(
+    (sum, item) => sum + Number(item.Sales || 0),
+    0
+  );
+
+  const totalOrders = new Set(
+    data.map((item) => item.Order_ID).filter(Boolean)
+  ).size;
+
+  const totalCountries = new Set(
+    data.map((item) => item.Country).filter(Boolean)
+  ).size;
+
+  const totalRegions = new Set(
+    data.map((item) => item.Region).filter(Boolean)
+  ).size;
+
+  const cards = [
+    {
+      title: "Countries",
+      value: totalCountries.toLocaleString("en-US"),
+      color: "text-cyan-400",
+      icon: "🌍",
+    },
+    {
+      title: "Regions",
+      value: totalRegions.toLocaleString("en-US"),
+      color: "text-green-400",
+      icon: "🌎",
+    },
+    {
+      title: "Total Revenue (USD)",
+      value: new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+      }).format(totalRevenue),
+      color: "text-yellow-400",
+      icon: "💰",
+    },
+    {
+      title: "Total Orders",
+      value: totalOrders.toLocaleString("en-US"),
+      color: "text-pink-400",
+      icon: "📦",
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+      {cards.map((card) => (
+        <div key={card.title} className="rounded-xl bg-slate-800 p-5">
+          <h3 className="text-gray-400">
+            {card.icon} {card.title}
+          </h3>
 
-      <div className="bg-slate-800 rounded-xl p-5">
-        <h3 className="text-gray-400">🌍 Countries</h3>
-        <p className="text-3xl font-bold text-cyan-400 mt-2">125</p>
-      </div>
-
-      <div className="bg-slate-800 rounded-xl p-5">
-        <h3 className="text-gray-400">🌎 Continents</h3>
-        <p className="text-3xl font-bold text-green-400 mt-2">6</p>
-      </div>
-
-      <div className="bg-slate-800 rounded-xl p-5">
-        <h3 className="text-gray-400">💰 Global Revenue</h3>
-        <p className="text-3xl font-bold text-yellow-400 mt-2">$24.8M</p>
-      </div>
-
-      <div className="bg-slate-800 rounded-xl p-5">
-        <h3 className="text-gray-400">📦 Global Orders</h3>
-        <p className="text-3xl font-bold text-pink-400 mt-2">2.48M</p>
-      </div>
-
+          <p className={`mt-2 text-3xl font-bold ${card.color}`}>
+            {card.value}
+          </p>
+        </div>
+      ))}
     </div>
   );
 }

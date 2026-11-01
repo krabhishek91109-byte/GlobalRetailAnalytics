@@ -12,7 +12,8 @@ function GlobalInsights() {
             📈 Best Performing Market
           </h3>
           <p className="text-gray-300 mt-2">
-            Asia contributes the highest global sales with strong year-over-year growth.
+            Global market performance will be calculated from the connected
+            global sales data.
           </p>
         </div>
 
@@ -21,7 +22,7 @@ function GlobalInsights() {
             💰 Highest Revenue
           </h3>
           <p className="text-gray-300 mt-2">
-            USA generated the highest revenue of $8.4M during this period.
+            Highest revenue country will be displayed from actual global data.
           </p>
         </div>
 
@@ -30,7 +31,7 @@ function GlobalInsights() {
             📦 Fastest Growing Region
           </h3>
           <p className="text-gray-300 mt-2">
-            Europe recorded the fastest growth in customer orders this quarter.
+            Regional growth will be calculated from the global sales dataset.
           </p>
         </div>
 
@@ -39,7 +40,8 @@ function GlobalInsights() {
             🎯 Recommendation
           </h3>
           <p className="text-gray-300 mt-2">
-            Focus marketing investment on Asia and Europe to maximize future revenue.
+            Business recommendations will be generated from actual sales
+            performance.
           </p>
         </div>
 

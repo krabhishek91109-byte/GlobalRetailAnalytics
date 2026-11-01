@@ -1,29 +1,17 @@
 import pandas as pd
-from sqlalchemy import create_engine
+from database import engine
 
-engine = create_engine("mysql+pymysql://root:password91109%40@localhost:3306/global_retail")
+file_path = r"D:\GlobalRetailAnalytics\backend\superstore.csv"
 
-df = pd.read_csv(r"D:\GlobalRetailAnalytics\backend\Retail_Sales_Data.csv")
-df = df.rename(columns={
-    "Transaction ID": "Transaction_ID",
-    "Age Group": "Age_Group",
-    "Product Category": "Product_Category",
-    "Price per Unit": "Price_per_Unit",
-    "Total Amount": "Total_Amount"
-})
+df = pd.read_csv(file_path)
 
-df = df[[
-    "Transaction_ID",
-    "Date",
-    "Gender",
-    "Age",
-    "Age_Group",
-    "Product_Category",
-    "Quantity",
-    "Price_per_Unit",
-    "Total_Amount"
-]]
+print("✅ Superstore data loaded")
+print("Rows:", len(df))
+print("Columns:", len(df.columns))
 
-df.to_sql("retail_sales", con=engine, if_exists="append", index=False)
+df.to_sql("global_sales",
+con=engine, if_exists="replace", 
+index=False)
 
-print("Data Imported Successfully!")
+
+print("✅ Global data imported into database!")

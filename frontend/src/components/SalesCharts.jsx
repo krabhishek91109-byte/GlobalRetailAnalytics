@@ -13,28 +13,13 @@ function SalesCharts() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/sales")
+    fetch("http://127.0.0.1:8000/dashboard-data")
       .then((res) => res.json())
-      .then((sales) => {
-        const monthlySales = {};
-
-        sales.forEach((item) => {
-          const date = new Date(item.Date);
-          const month = date.toLocaleString("default", {
-            month: "short",
-          });
-
-          monthlySales[month] =
-            (monthlySales[month] || 0) +
-            Number(item.Total_Amount || 0);
-        });
-
-        const chartData = Object.keys(monthlySales).map((month) => ({
-          month,
-          sales: monthlySales[month],
-        }));
-
-        setData(chartData);
+      .then((result) => {
+        setData(result.monthly_sales || []);
+      })
+      .catch((error) => {
+        console.error("Sales data error:", error);
       });
   }, []);
 
@@ -46,15 +31,28 @@ function SalesCharts() {
 
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis dataKey="month" stroke="#94A3B8" />
-          <YAxis stroke="#94A3B8" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="#334155"
+          />
+
+          <XAxis
+            dataKey="month"
+            stroke="#94A3B8"
+          />
+
+          <YAxis
+            stroke="#94A3B8"
+          />
+
           <Tooltip />
+
           <Line
             type="monotone"
             dataKey="sales"
             stroke="#06B6D4"
             strokeWidth={3}
+            dot={{ r: 4 }}
           />
         </LineChart>
       </ResponsiveContainer>

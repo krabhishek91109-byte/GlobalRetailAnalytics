@@ -2,52 +2,74 @@ import { useEffect, useState } from "react";
 
 function TopProducts() {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/sales")
-      .then((res) => res.json())
+    fetch("http://127.0.0.1:8000/sales?limit=5000")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch sales data");
+        }
+        return res.json();
+      })
       .then((sales) => {
-        const productMap = {};
+        const categoryMap = {};
 
         sales.forEach((item) => {
-          const product = item.Product_Category || "Other";
+          const category = item.Category || item.Product_Category;
 
-          productMap[product] =
-            (productMap[product] || 0) + Number(item.Quantity ||  0);
+          if (!category) return;
+
+          categoryMap[category] =
+            (categoryMap[category] || 0) + Number(item.Quantity || 0);
         });
 
-        const sortedProducts = Object.keys(productMap)
-          .map((key) => ({
-            name: key,
-            sales: productMap[key],
+        const sortedCategories = Object.entries(categoryMap)
+          .map(([name, quantity]) => ({
+            name,
+            sales: quantity,
           }))
           .sort((a, b) => b.sales - a.sales)
           .slice(0, 5);
 
-        setProducts(sortedProducts);
-      });
+        setProducts(sortedCategories);
+      })
+      .catch((err) => {
+        console.error("Error loading categories:", err);
+        setError("Unable to load product categories.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
-    <div className="bg-slate-800 p-5 rounded-xl mt-6">
-      <h2 className="text-xl font-bold text-white mb-4">
+    <div className="mt-6 rounded-xl bg-slate-800 p-5">
+      <h2 className="mb-4 text-xl font-bold text-white">
         🏆 Top Selling Categories
       </h2>
 
-      {products.map((product, index) => (
-        <div
-          key={index}
-          className="flex justify-between items-center py-3 border-b border-slate-700"
-        >
-          <span className="text-cyan-300 font-semibold">
-            {product.name}
-          </span>
+      {loading ? (
+        <p className="text-cyan-400">Loading categories...</p>
+      ) : error ? (
+        <p className="text-red-400">{error}</p>
+      ) : products.length === 0 ? (
+        <p className="text-gray-400">No category data available.</p>
+      ) : (
+        products.map((product) => (
+          <div
+            key={product.name}
+            className="flex items-center justify-between border-b border-slate-700 py-3"
+          >
+            <span className="font-semibold text-cyan-300">
+              {product.name}
+            </span>
 
-          <span className="text-cyan-400 font-bold">
-            {product.sales} Units
-          </span>
-        </div>
-      ))}
+            <span className="font-bold text-cyan-400">
+              {product.sales.toLocaleString("en-US")} Units
+            </span>
+          </div>
+        ))
+      )}
     </div>
   );
 }

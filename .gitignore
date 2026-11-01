@@ -1,0 +1,22 @@
+Python
+
+.venv/
+venv/
+pycache/
+*.py[cod]
+
+Environment variables and secrets
+
+.env
+.env.*
+!.env.example
+
+Frontend
+
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+Dataset
+
+backend/superstore.csv

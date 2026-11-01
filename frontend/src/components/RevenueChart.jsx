@@ -13,28 +13,13 @@ function RevenueChart() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/sales")
+    fetch("http://127.0.0.1:8000/dashboard-data")
       .then((res) => res.json())
-      .then((sales) => {
-        const monthlyRevenue = {};
-
-        sales.forEach((item) => {
-          const date = new Date(item.Date);
-          const month = date.toLocaleString("default", {
-            month: "short",
-          });
-
-          monthlyRevenue[month] =
-            (monthlyRevenue[month] || 0) +
-            Number(item.Total_Amount || 0);
-        });
-
-        const chartData = Object.keys(monthlyRevenue).map((month) => ({
-          month,
-          revenue: monthlyRevenue[month],
-        }));
-
-        setData(chartData);
+      .then((result) => {
+        setData(result.monthly_sales || []);
+      })
+      .catch((error) => {
+        console.error("Revenue data error:", error);
       });
   }, []);
 
@@ -46,13 +31,25 @@ function RevenueChart() {
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis dataKey="month" stroke="#fff" />
-          <YAxis stroke="#fff" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="#374151"
+          />
+
+          <XAxis
+            dataKey="month"
+            stroke="#fff"
+          />
+
+          <YAxis
+            stroke="#fff"
+          />
+
           <Tooltip />
+
           <Bar
-            dataKey="revenue"
-            fill="#06b6d4"
+            dataKey="sales"
+            fill="#06B6D4"
             radius={[6, 6, 0, 0]}
           />
         </BarChart>

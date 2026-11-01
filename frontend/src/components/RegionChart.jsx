@@ -1,77 +1,103 @@
 import { useEffect, useState } from "react";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+PieChart,
+Pie,
+Cell,
+Tooltip,
+ResponsiveContainer,
+Legend,
 } from "recharts";
 
-const COLORS = [
-  "#06b6d4",
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-];
+const COLORS = ["#06b6d4", "#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
 function RegionChart() {
-  const [data, setData] = useState([]);
+const [data, setData] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetch("http://127.0.0.1:8000/sales")
-      .then((res) => res.json())
-      .then((sales) => {
-        const categoryMap = {};
+useEffect(() => {
+fetch("http://127.0.0.1:8000/sales?limit=5000")
+.then((res) => {
+if (!res.ok) {
+throw new Error("Failed to fetch sales data");
+}
+return res.json();
+})
+.then((sales) => {
+const categoryMap = {};
 
-        sales.forEach((item) => {
-          const category = item.Product_Category || "Other";
+    sales.forEach((item) => {
+      const category = item.Category || item.Product_Category;
 
-          categoryMap[category] =
-            (categoryMap[category] || 0) + Number(item.Quantity ||  0);
-        });
+      if (!category) return;
 
-        const chartData = Object.keys(categoryMap).map((key) => ({
-          name: key,
-          value: categoryMap[key],
-        }));
+      categoryMap[category] =
+        (categoryMap[category] || 0) + Number(item.Quantity || 0);
+    });
 
-        setData(chartData);
+    const chartData = Object.entries(categoryMap).map(
+      ([name, quantity]) => ({
+        name,
+        value: quantity,
       })
-      .catch((err) => console.log(err));
-  }, []);
+    );
 
-  return (
-    <div className="bg-slate-800 rounded-xl p-5 mt-6">
-      <h2 className="text-xl font-bold text-white mb-4">
-        Product Category Analytics
-      </h2>
+    setData(chartData);
+    setError("");
+  })
+  .catch((err) => {
+    console.error("Category chart error:", err);
+    setError("Unable to load category data.");
+  })
+  .finally(() => setLoading(false));
 
-      <ResponsiveContainer width="100%" height={320}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            outerRadius={110}
-            dataKey="value"
-            label
-          >
-            {data.map((entry, index) => (
-              <Cell
-                key={index}
-                fill={COLORS[index % COLORS.length]}
-              />
-            ))}
-          </Pie>
+}, []);
 
-          <Tooltip />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
-  );
+return (
+<div className="mt-6 rounded-xl bg-slate-800 p-5">
+<h2 className="mb-4 text-xl font-bold text-white">
+Product Category Analytics
+</h2>
+
+  {loading ? (
+    <p className="text-cyan-400">Loading category data...</p>
+  ) : error ? (
+    <p className="text-red-400">{error}</p>
+  ) : data.length === 0 ? (
+    <p className="text-gray-400">No category data available.</p>
+  ) : (
+    <ResponsiveContainer width="100%" height={320}>
+      <PieChart>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          outerRadius={110}
+          dataKey="value"
+          nameKey="name"
+          label={({ name }) => name}
+        >
+          {data.map((entry, index) => (
+            <Cell
+              key={entry.name}
+              fill={COLORS[index % COLORS.length]}
+            />
+          ))}
+        </Pie>
+
+        <Tooltip
+          formatter={(value) => [
+            `${Number(value).toLocaleString("en-US")} units`,
+            "Quantity",
+          ]}
+        />
+        <Legend />
+      </PieChart>
+    </ResponsiveContainer>
+  )}
+</div>
+
+);
 }
 
 export default RegionChart;

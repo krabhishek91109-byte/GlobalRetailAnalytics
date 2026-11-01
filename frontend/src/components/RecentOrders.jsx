@@ -1,88 +1,121 @@
 import { useEffect, useState } from "react";
 
-function RecentOrders({ search }) {
+function RecentOrders({ search = "" }) {
   const [orders, setOrders] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("https://globalretailanalytics.onrender.com/sales")
-      .then((res) => res.json())
+    fetch("http://127.0.0.1:8000/sales?limit=1000")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch orders");
+        }
+        return res.json();
+      })
       .then((data) => {
-        const latestOrders = [...data]
-          .sort((a, b) => b.Transaction_ID - a.Transaction_ID)
-          .slice(0, 10);
+      const uniqueOrders = Array.from(
+  new Map(
+    [...data]
+      .sort(
+        (a, b) =>
+          new Date(b.Order_Date) - new Date(a.Order_Date)
+      )
+      .map((item) => [item.Order_ID, item])
+  ).values()
+);
+const countryOrders = new Map();
 
-          setOrders(latestOrders);
-      setLoading(false);
-    })
-    .catch(() => {
-      setError("Unable to connect to server.");
-      setLoading(false);
+uniqueOrders.forEach((order) => {
+  const country = order.Country || "Unknown";
+
+  if (!countryOrders.has(country)) {
+    countryOrders.set(country, order);
+  }
+});
+
+const latestOrders = Array.from(countryOrders.values()).slice(0, 10);
+
+setOrders(latestOrders);
+      })
+      .catch((err) => {
+        console.error("Error loading orders:", err);
+        setError("Unable to load orders. Check whether the backend is running.");
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
   const filteredOrders = orders.filter((order) =>
-    order.Product_Category.toLowerCase().includes(
-      search.toLowerCase()
-    )
+    String(order.Country || "")
+      .toLowerCase()
+      .includes(search.toLowerCase())
   );
-if (loading) {
-  return (
-    <div className="bg-slate-800 p-5 rounded-xl mt-6 text-center text-cyan-400">
-      Loading orders...
-    </div>
-  );
-}
 
-if (error) {
+  if (loading) {
+    return (
+      <div className="mt-6 rounded-xl bg-slate-800 p-5 text-center text-cyan-400">
+        Loading orders...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-6 rounded-xl bg-slate-800 p-5 text-center text-red-400">
+        {error}
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-slate-800 p-5 rounded-xl mt-6 text-center text-red-400">
-      {error}
-    </div>
-  );
-}
-  return (
-    <div className="bg-slate-800 p-5 rounded-xl mt-6">
-      <h2 className="text-xl font-bold mb-4 text-white">
+    <div className="mt-6 rounded-xl bg-slate-800 p-5">
+      <h2 className="mb-4 text-xl font-bold text-white">
         Recent Orders
       </h2>
 
-      <table className="w-full text-left text-white">
-        <thead>
-          <tr className="border-b border-slate-700">
-            <th className="py-2">Order ID</th>
-            <th className="py-2">Category</th>
-            <th className="py-2 text-center">Quantity</th>
-            <th className="py-2 text-center">Amount</th>
-            <th className="py-2 text-center">Date</th>
-          </tr>
-        </thead>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-white">
+          <thead>
+            <tr className="border-b border-slate-700">
+              <th className="py-2">Order ID</th>
+              <th className="py-2">Country</th>
+              <th className="py-2 text-center">Quantity</th>
+              <th className="py-2 text-center">Sales (USD)</th>
+              <th className="py-2 text-center">Year</th>
+            </tr>
+          </thead>
 
-        <tbody>
-         {filteredOrders.length === 0 ? (
-  <tr>
-    <td colSpan="5" className="text-center py-6 text-gray-400">
-      No records found
-    </td>
-  </tr>
-) : (
-  filteredOrders.map((order) => (
-    <tr
-      key={order.Transaction_ID}
-      className="border-b border-slate-700"
-    >
-      <td className="py-3">{order.Transaction_ID}</td>
-      <td>{order.Product_Category}</td>
-      <td className="text-center">{order.Quantity}</td>
-      <td className="text-center">₹{order.Total_Amount}</td>
-      <td className="text-center">{order.Date}</td>
-    </tr>
-  ))
-)}
-        </tbody>
-      </table>
+          <tbody>
+            {filteredOrders.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="py-6 text-center text-gray-400">
+                  No records found
+                </td>
+              </tr>
+            ) : (
+              filteredOrders.map((order, index) => (
+                <tr
+                  key={`${order.Order_ID || "order"}-${index}`}
+                  className="border-b border-slate-700"
+                >
+                  <td className="py-3">{order.Order_ID || "N/A"}</td>
+                  <td>{order.Country || "N/A"}</td>
+                  <td className="text-center">{order.Quantity ?? 0}</td>
+                  <td className="text-center">
+                    ${Number(order.Sales || 0).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td className="text-center">{order.Year || "N/A"}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
