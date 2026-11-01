@@ -16,7 +16,7 @@ const [loading, setLoading] = useState(true);
 const [error, setError] = useState("");
 
 useEffect(() => {
-fetch("${import.meta.env.VITE_API_URL}/sales?limit=5000")
+fetch(`${import.meta.env.VITE_API_URL}/sales?limit=5000`)
 .then((res) => {
 if (!res.ok) {
 throw new Error("Failed to fetch sales data");

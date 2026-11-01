@@ -13,7 +13,7 @@ function RevenueChart() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch("${import.meta.env.VITE_API_URL}/dashboard-data")
+    fetch(`${import.meta.env.VITE_API_URL}/dashboard-data`)
       .then((res) => res.json())
       .then((result) => {
         setData(result.monthly_sales || []);

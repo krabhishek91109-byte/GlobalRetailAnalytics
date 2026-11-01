@@ -6,7 +6,7 @@ function RecentOrders({ search = "" }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("${import.meta.env.VITE_API_URL}/sales?limit=1000")
+    fetch(`${import.meta.env.VITE_API_URL}/sales?limit=1000`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch orders");

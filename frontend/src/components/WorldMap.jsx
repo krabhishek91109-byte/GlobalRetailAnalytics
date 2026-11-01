@@ -8,7 +8,7 @@ import {
 const geoUrl =
   "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
-const API_URL = "${import.meta.env.VITE_API_URL}/country-sales";
+const API_URL = `${import.meta.env.VITE_API_URL}/country-sales`;
 
 // Match different spellings of country names
 const countryAliases = {

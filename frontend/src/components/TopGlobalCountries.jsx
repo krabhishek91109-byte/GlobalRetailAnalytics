@@ -6,7 +6,7 @@ function TopGlobalCountries({ search = "" }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("${import.meta.env.VITE_API_URL}/country-sales")
+    fetch(`${import.meta.env.VITE_API_URL}/country-sales`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to load country data");
