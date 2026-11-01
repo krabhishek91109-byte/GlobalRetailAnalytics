@@ -8,8 +8,14 @@ function ExportReports() {
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/sales`)
-      .then((res) => res.json())
-      .then((data) => setSales(data));
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch sales data");
+        }
+        return res.json();
+      })
+      .then((data) => setSales(data))
+      .catch((err) => console.error("Sales data error:", err));
   }, []);
 
   const exportCSV = () => {
@@ -29,8 +35,9 @@ function ExportReports() {
       item.Total_Amount,
     ]);
 
-    const csv =
-      [headers, ...rows].map((e) => e.join(",")).join("\n");
+    const csv = [headers, ...rows]
+      .map((row) => row.join(","))
+      .join("\n");
 
     const blob = new Blob([csv], {
       type: "text/csv;charset=utf-8;",

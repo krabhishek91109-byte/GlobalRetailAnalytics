@@ -14,7 +14,7 @@ const [data, setData] = useState([]);
 const [loading, setLoading] = useState(true);
 
 useEffect(() => {
-fetch("http://127.0.0.1:8000/dashboard-data")
+fetch("${import.meta.env.VITE_API_URL}/dashboard-data")
 .then((res) => {
 if (!res.ok) {
 throw new Error("Failed to load dashboard data");
